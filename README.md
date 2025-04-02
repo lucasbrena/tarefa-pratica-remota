@@ -57,37 +57,12 @@ This project is licensed under the MIT License.
 1. DRY (Don't Repeat Yourself)
 Aplicação: A função genérica apiRequest centraliza as chamadas HTTP (GET, POST, etc.), evitando duplicação de código para requisições com Axios.
 
-async apiRequest(method, url, data = null) {
-  try {
-    const response = await axios({ method, url, data });
-    return response.data;
-  } catch (error) {
-    console.error(`Erro na requisição ${method.toUpperCase()} ${url}:`, error);
-    alert("Ocorreu um erro ao processar a solicitação.");
-    throw error;
-  }
-}
 2. Validação de Dados
 Aplicação: A função validarTarefa encapsula a lógica de validação de tarefas, separando-a da lógica de envio de dados.
-validarTarefa(tarefa) {
-  if (!tarefa.titulo.trim()) {
-    alert("O título da tarefa não pode estar vazio.");
-    return false;
-  }
-  return true;
-} Refatoração Contínua
 
 3. Aplicação: O uso de métodos como carregarTarefas e adicionarTarefa demonstra uma separação clara de responsabilidades, o que é um sinal de refatoração contínua para manter o código organizado.
 async carregarTarefas() {
   this.tarefas = await this.apiRequest("get", "http://localhost:3000/tarefas");
-}
-
-async adicionarTarefa() {
-  if (!this.validarTarefa(this.novaTarefa)) return;
-
-  await this.apiRequest("post", "http://localhost:3000/tarefas", this.novaTarefa);
-  this.novaTarefa = { titulo: "", concluida: false };
-  this.carregarTarefas();
 }
 
 4. Pequenos Commits
