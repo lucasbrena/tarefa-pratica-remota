@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de Tarefas</title>
+    <!-- Import Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <!-- Import Vuetify -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/vuetify@3.3.0/dist/vuetify.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.3.0/dist/vuetify.min.js"></script>
+    <!-- Import Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <v-app>
+        <v-container>
+          <v-row>
+            <v-col cols="6" md="6" offset-md="3">
+              <h1>Lista de Tarefas</h1>
+              <!-- Formulário para adicionar nova tarefa -->
+              <v-form @submit.prevent="adicionarTarefa">
+                <v-text-field
+                  v-model="novaTarefa.titulo"
+                  label="Título da tarefa"
+                  required
+                >
+                </v-text-field>
+                <v-select
+                  v-model="novaTarefa.concluida"
+                  :items="statusOptions"
+                  label="Status"
+                  item-title="text"
+                  item-value="value"
+                  required
+                ></v-select>
+                <v-btn type="submit" color="primary">Adicionar Tarefa</v-btn>
+              </v-form>
+            </v-col>
+          </v-row>
+          <v-row justify="center">
+            <v-col cols="6" md="6">
+              <v-list>
+                <v-list-item v-for="tarefa in tarefas" :key="tarefa.id">
+                  <v-list-item-title> {{ tarefa.titulo }} </v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{ tarefa.concluida ? 'Concluída' : 'Pendente' }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-app>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+      const { createVuetify } = Vuetify;
+
+      const app = createApp({
+        data() {
+          return {
+            tarefas: [],
+            novaTarefa: {
+              titulo: "",
+              concluida: false,
+            },
+            statusOptions: [
+              { text: "Pendente", value: false },
+              { text: "Concluída", value: true },
+            ],
+          };
+        },
+        methods: {
+          async apiRequest(method, url, data = null) {
+            try {
+              const response = await axios({ method, url, data });
+              return response.data;
+            } catch (error) {
+              console.error(`Erro na requisição ${method.toUpperCase()} ${url}:`, error);
+              alert("Ocorreu um erro ao processar a solicitação.");
+              throw error;
+            }
+          },
+          validarTarefa(tarefa) {
+            if (!tarefa.titulo.trim()) {
+              alert("O título da tarefa não pode estar vazio.");
+              return false;
+            }
+            return true;
+          },
+          async carregarTarefas() {
+            this.tarefas = await this.apiRequest("get", "http://localhost:3000/tarefas");
+          },
+          async adicionarTarefa() {
+            if (!this.validarTarefa(this.novaTarefa)) return;
+
+            await this.apiRequest("post", "http://localhost:3000/tarefas", this.novaTarefa);
+            this.novaTarefa = { titulo: "", concluida: false };
+            this.carregarTarefas();
+          },
+        },
+        mounted() {
+          this.carregarTarefas();
+        },
+      });
+
+      const vuetify = createVuetify();
+      app.use(vuetify);
+      app.mount("#app");
+    </script>
+  </body>
+</html>
